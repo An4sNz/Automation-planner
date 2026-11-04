@@ -62,4 +62,4 @@ HTML, CSS, and vanilla JavaScript. No external libraries.
 
 ## Author
 
-ANAS ALQAHTANI | [LinkedIn](https://linkedin.com/in/your-profile) | an4salgahtani@gmail.com
+ANAS ALQAHTANI | an4salgahtani@gmail.com
