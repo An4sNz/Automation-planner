@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Automation Planner</title>
+<style>
+:root{--bg:#f3f6f8;--surf:#fff;--ink:#14232e;--mute:#5b6c78;--line:#d5dee4;--acc:#0d6e6e;--acc2:#e6f2f2;--warn:#b4541a;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e171d;--surf:#16232b;--ink:#e7eef2;--mute:#93a5b0;--line:#2a3b46;--acc:#4fc0bd;--acc2:#12302f;--warn:#f0a070;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e171d;--surf:#16232b;--ink:#e7eef2;--mute:#93a5b0;--line:#2a3b46;--acc:#4fc0bd;--acc2:#12302f;--warn:#f0a070;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:980px;margin:0 auto;padding:24px 16px 48px}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 20px;max-width:62ch}
+nav{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:20px;overflow-x:auto}
+nav button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font:inherit;color:var(--mute);cursor:pointer;white-space:nowrap}
+nav button[aria-selected=true]{color:var(--ink);border-color:var(--acc);font-weight:600}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.panel{display:none}.panel.on{display:block}
+.box{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:16px;margin-bottom:16px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:760px}
+th{font-weight:600;text-align:left;font-size:13px;color:var(--mute);padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:6px;border-bottom:1px solid var(--line);vertical-align:middle}
+input[type=number],input[type=text],select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:5px 6px;width:100%}
+td input[type=number]{width:64px}
+.bar{height:10px;background:var(--acc2);border-radius:5px;min-width:90px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:5px}
+.sc{font-weight:700;min-width:28px;display:inline-block}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.row label{flex:1 1 170px;font-size:13px;color:var(--mute);display:block}
+.row label input{margin-top:4px}
+.btn{background:var(--acc);color:var(--bg);border:0;border-radius:5px;padding:8px 14px;font:inherit;font-weight:600;cursor:pointer}
+.btn.ghost{background:none;color:var(--acc);border:1px solid var(--acc)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:16px}
+.k{background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:14px}
+.k b{display:block;font-size:24px;letter-spacing:-.01em}
+.k span{color:var(--mute);font-size:13px}
+.note{color:var(--mute);font-size:13px;margin:8px 0 0}
+.tl{display:grid;gap:0}
+.ph{display:grid;grid-template-columns:130px 1fr;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.ph:last-child{border:0}
+.ph strong{display:block}.ph small{color:var(--mute)}
+.ph ul{margin:0;padding-left:18px}
+.chart{display:flex;align-items:flex-end;gap:6px;height:150px;margin-top:8px}
+.chart div{flex:1;background:var(--acc);border-radius:3px 3px 0 0;position:relative;min-height:2px}
+.chart div.neg{background:var(--warn)}
+.chart span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:11px;color:var(--mute)}
+@media (max-width:600px){.ph{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<h1>Automation planner</h1>
+<p class="sub">Score a company’s manual processes, pick what to automate first, and model the savings. All starting data is sample data you can edit.</p>
+<nav role="tablist" id="tabs">
+<button role="tab" aria-selected="true" data-t="p1">Prioritize</button>
+<button role="tab" aria-selected="false" data-t="p2">ROI model</button>
+<button role="tab" aria-selected="false" data-t="p3">Roadmap</button>
+</nav>
+
+<section class="panel on" id="p1">
+<div class="box">
+<div class="row">
+<label>Weight: business value (%)<input type="number" id="wv" value="40" min="0" max="100"></label>
+<label>Weight: feasibility (%)<input type="number" id="wf" value="35" min="0" max="100"></label>
+<label>Weight: low risk (%)<input type="number" id="wr" value="25" min="0" max="100"></label>
+</div>
+<p class="note">Rate each process 1 to 5. Risk counts in reverse, so a lower risk score raises priority. Priority = weighted average, scaled to 100.</p>
+</div>
+<div class="box scroll">
+<table>
+<thead><tr><th>Process</th><th>Department</th><th>Hours / month</th><th>Value</th><th>Feasibility</th><th>Risk</th><th>Build cost ($)</th><th>Priority</th><th>Pilot</th></tr></thead>
+<tbody id="tb"></tbody>
+</table>
+<p style="margin:12px 0 0"><button class="btn" id="sort">Sort by priority</button> <button class="btn ghost" id="add">Add process</button></p>
+<p class="note">Tick “Pilot” to include a process in the ROI model.</p>
+</div>
+</section>
+
+<section class="panel" id="p2">
+<div class="box">
+<div class="row">
+<label>Loaded cost per hour ($)<input type="number" id="rate" value="20" min="0"></label>
+<label>Share of work automated (%)<input type="number" id="auto" value="70" min="0" max="100"></label>
+<label>Yearly licences and maintenance ($)<input type="number" id="lic" value="3000" min="0"></label>
+<label>Training and change management ($)<input type="number" id="trn" value="2000" min="0"></label>
+</div>
+</div>
+<div class="kpis" id="kp"></div>
+<div class="box"><strong>Cumulative net cash position by month (year 1)</strong><div class="chart" id="ch"></div><p class="note" style="margin-top:28px">Orange bars mean the program has not yet paid for itself. The model assumes savings begin in month 1 after go-live.</p></div>
+</section>
+
+<section class="panel" id="p3">
+<div class="box tl">
+<div class="ph"><div><strong>Assess</strong><small>Weeks 1 to 4</small></div><ul><li>Interview department heads and map current processes</li><li>Score digital maturity: systems, data quality, skills</li><li>Build the process inventory (use the Prioritize tab)</li></ul></div>
+<div class="ph"><div><strong>Prioritize</strong><small>Weeks 5 to 6</small></div><ul><li>Score processes on value, feasibility, and risk</li><li>Choose 3 to 5 quick-win pilots</li></ul></div>
+<div class="ph"><div><strong>Design</strong><small>Weeks 7 to 10</small></div><ul><li>Fix the process before automating it</li><li>Define architecture, data flows, and access controls</li></ul></div>
+<div class="ph"><div><strong>Build and pilot</strong><small>Weeks 11 to 18</small></div><ul><li>Build automations and run user acceptance testing</li><li>Measure the pilot against the baseline</li></ul></div>
+<div class="ph"><div><strong>Scale and govern</strong><small>Weeks 19 to 26</small></div><ul><li>Roll out to other departments</li><li>Set up a Center of Excellence for standards and the idea backlog</li><li>Train staff and manage change</li></ul></div>
+</div>
+<div class="box"><strong>Pilot shortlist</strong><div id="sl" style="margin-top:8px"></div></div>
+</section>
+</main>
+<script>
+var P=[
+{n:"Invoice processing",d:"Finance",h:150,v:5,f:4,r:2,c:6000,on:true},
+{n:"Bank reconciliation",d:"Finance",h:60,v:4,f:4,r:2,c:3500,on:true},
+{n:"Employee onboarding",d:"HR",h:40,v:3,f:5,r:1,c:2500,on:true},
+{n:"Support ticket routing",d:"Customer service",h:90,v:4,f:3,r:2,c:5000,on:false},
+{n:"Quote generation",d:"Sales",h:50,v:4,f:4,r:2,c:3000,on:false},
+{n:"Contract review",d:"Legal",h:30,v:3,f:2,r:4,c:9000,on:false},
+{n:"Access provisioning",d:"IT",h:25,v:3,f:4,r:3,c:2500,on:false},
+{n:"Inventory alerts",d:"Supply chain",h:35,v:3,f:4,r:1,c:2000,on:false}
+];
+var $=function(i){return document.getElementById(i)};
+function money(x){return "$"+Math.round(x).toLocaleString("en-US")}
+function score(p){
+ var a=+$("wv").value||0,b=+$("wf").value||0,c=+$("wr").value||0,t=a+b+c||1;
+ return Math.round(((p.v*a+p.f*b+(6-p.r)*c)/t)/5*100);
+}
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]})}
+function num(i,k,mn,mx,w){return '<input type="number" data-i="'+i+'" data-k="'+k+'" value="'+P[i][k]+'" min="'+mn+'" max="'+mx+'"'+(w?' style="width:'+w+'"':'')+'>'}
+function render(){
+ $("tb").innerHTML=P.map(function(p,i){return '<tr>'+
+ '<td><input type="text" data-i="'+i+'" data-k="n" value="'+esc(p.n)+'"></td>'+
+ '<td><input type="text" data-i="'+i+'" data-k="d" value="'+esc(p.d)+'"></td>'+
+ '<td>'+num(i,"h",0,9999)+'</td><td>'+num(i,"v",1,5,"52px")+'</td><td>'+num(i,"f",1,5,"52px")+'</td><td>'+num(i,"r",1,5,"52px")+'</td>'+
+ '<td>'+num(i,"c",0,999999,"84px")+'</td>'+
+ '<td><span class="sc" id="s'+i+'"></span><div class="bar"><i id="b'+i+'"></i></div></td>'+
+ '<td><input type="checkbox" data-i="'+i+'" data-k="on"'+(p.on?' checked':'')+' aria-label="Include in pilot"></td></tr>'}).join("");
+ refresh();
+}
+function refresh(){
+ P.forEach(function(p,i){var s=score(p);$("s"+i).textContent=s;$("b"+i).style.width=s+"%"});
+ roi();shortlist();
+}
+function roi(){
+ var rate=+$("rate").value||0,au=(+$("auto").value||0)/100,lic=+$("lic").value||0,trn=+$("trn").value||0;
+ var sel=P.filter(function(p){return p.on});
+ var hrs=sel.reduce(function(a,p){return a+p.h},0)*au;
+ var save=hrs*12*rate,build=sel.reduce(function(a,p){return a+p.c},0)+trn;
+ var net=save-lic,pay=net>0?build/(net/12):Infinity;
+ var roi3=build+lic*3>0?((save*3-lic*3-build)/(build+lic*3))*100:0;
+ $("kp").innerHTML=[
+ [Math.round(hrs).toLocaleString("en-US"),"hours saved per month"],
+ [money(save),"gross savings per year"],
+ [money(build),"one-time investment"],
+ [isFinite(pay)?pay.toFixed(1)+" months":"No payback","payback period"],
+ [Math.round(roi3)+"%","3-year ROI"]
+ ].map(function(k){return '<div class="k"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>'}).join("");
+ var vals=[],cum=-build;
+ for(var m=1;m<=12;m++){cum+=save/12-lic/12;vals.push(cum)}
+ var mx=Math.max.apply(null,vals.map(Math.abs).concat([1]));
+ $("ch").innerHTML=vals.map(function(v,i){return '<div class="'+(v<0?"neg":"")+'" style="height:'+Math.max(2,Math.abs(v)/mx*100)+'%" title="Month '+(i+1)+': '+money(v)+'"><span>'+(i+1)+'</span></div>'}).join("");
+}
+function shortlist(){
+ var s=P.filter(function(p){return p.on}).map(function(p){return[p,score(p)]}).sort(function(a,b){return b[1]-a[1]});
+ $("sl").innerHTML=s.length?"<ol style='margin:0;padding-left:20px'>"+s.map(function(x){return "<li><b>"+esc(x[0].n)+"</b> ("+esc(x[0].d)+"), priority "+x[1]+", "+x[0].h+" hours per month</li>"}).join("")+"</ol>":"<span class='note'>No pilots selected yet. Tick “Pilot” on the Prioritize tab.</span>";
+}
+$("tb").addEventListener("input",function(e){
+ var t=e.target,i=t.dataset.i,k=t.dataset.k;if(i==null)return;
+ P[i][k]=t.type==="checkbox"?t.checked:(t.type==="number"?+t.value||0:t.value);
+ refresh();
+});
+["wv","wf","wr","rate","auto","lic","trn"].forEach(function(i){$(i).addEventListener("input",refresh)});
+$("sort").onclick=function(){P.sort(function(a,b){return score(b)-score(a)});render()};
+$("add").onclick=function(){P.push({n:"New process",d:"Department",h:20,v:3,f:3,r:3,c:2000,on:false});render()};
+document.querySelectorAll("#tabs button").forEach(function(b){b.onclick=function(){
+ document.querySelectorAll("#tabs button").forEach(function(x){x.setAttribute("aria-selected",x===b)});
+ document.querySelectorAll(".panel").forEach(function(p){p.classList.toggle("on",p.id===b.dataset.t)});
+}});
+render();
+</script>
+</body>
+</html>
