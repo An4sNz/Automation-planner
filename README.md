@@ -4,7 +4,7 @@ An interactive tool that helps a private-sector company decide **which manual pr
 
 > All data in the tool is **sample data** for demonstration. Figures it produces are modeled estimates, not measured results.
 
-![Screenshot](screenshot.png)
+![Screenshot](automation-planner.png)
 <!-- Add a screenshot of the app here and name the file screenshot.png -->
 
 ## Features
