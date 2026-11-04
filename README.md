@@ -17,7 +17,7 @@ An interactive tool that helps a private-sector company decide **which manual pr
 
 No installation or dependencies. It is a single HTML file.
 
-1. Download `index.html` 
+1. Download `automation-planner.html` 
 2. Open it in any modern browser.
 
 To host it free on GitHub Pages: go to **Settings > Pages**, choose the `main` branch, and save.
