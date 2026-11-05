@@ -17,7 +17,7 @@ An interactive tool that helps a private-sector company decide **which manual pr
 
 No installation or dependencies. It is a single HTML file.
 
-1. Download `file:///C:/Users/an4sa/OneDrive/Documenten/GitHub/automation-planner/automation-planner.html` 
+1. Download `https://an4snz.github.io/Automation-planner/automation-planner.html` 
 2. Open it in any modern browser.
 
 To host it free on GitHub Pages: go to **Settings > Pages**, choose the `main` branch, and save.
